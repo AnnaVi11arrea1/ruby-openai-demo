@@ -1,16 +1,6 @@
 require "openai"
 
-pp "Hello! How can I help you today?" 
-
-print "-" * 50
-puts 
-
 client = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
-
-pp client
-
-userquestion = gets.chomp
-pp "I can certainly help your request of: #{userquestion}"
 
 message_list = [
   {
@@ -19,34 +9,17 @@ message_list = [
   },
   {
     "role" => "user",
-    "content" => "#{userquestion}"
+    "content" => "The user asks about what upcoming concerts are happening in their area"
   }
 ]
 
-def chat_with_retry(client, message_list)
-  retries = 0
-  begin
-    # Call the API to get the next message from GPT
-    api_response = client.chat(
-      parameters: {
-        model: "gpt-3.5-turbo",
-        messages: message_list
-      }
-    )
-    return api_response
-  rescue Faraday::TooManyRequestsError => e
-    retries += 1
-    if retries <= 5
-      delay = retries * 2
-      pp "Rate limit exceeded. Retrying in #{delay} seconds..."
-      sleep(delay)
-      retry
-    else
-      pp "Too many retries. Please try again later."
-      return nil
-    end
-  end
-end
+pp "Hello! How can I help you today?" 
+
+print "-" * 50
+puts 
+
+userquestion = gets.chomp
+pp "I can certainly help your request of: #{userquestion}"
 
 while userquestion != "bye"
 # Call the API to get the next message from GPT
@@ -56,8 +29,16 @@ while userquestion != "bye"
       messages: message_list
     }
   )
+  
+  information = api_response
+  choices = information.fetch("choices")
+  message = choices.at(0)
+  reply = message.fetch("message").fetch("content")
 
-  pp api_response
+  pp reply
+
+
+
 
   print "-" * 50
   puts 
