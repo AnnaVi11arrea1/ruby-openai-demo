@@ -1,11 +1,11 @@
 require "openai"
 require "json"
+require "sinatra"
 
-get("/")do
-  erb(:chat)
-end
 
-post("/chat")do
+
+get("/chat")do
+ 
   client = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
 
   message_list = [
@@ -19,13 +19,16 @@ post("/chat")do
     }
   ]
 
+  userquestion = params[:message]
   pp "Hello! How can I help you today? Enter 'bye' to end."
 
   print "-" * 50
   puts 
 
-  userquestion = gets.chomp
+
   pp "I can certainly help your request of: #{userquestion}"
+
+  message_list << { "role" => "user", "content" => userquestion }
 
   while userquestion != "bye"
   # Call the API to get the next message from GPT
@@ -36,6 +39,9 @@ post("/chat")do
       }
     )
     
+    response = api_response["choices"].first["message"]["content"]
+    { response: response }.to_json  
+
     information = api_response
     choices = information.fetch("choices")
     message = choices.at(0)
@@ -59,6 +65,6 @@ post("/chat")do
   end
 
   pp "Have a great day!"
-
+  erb(:chat, {:layout => :layout })
   
 end

@@ -5,3 +5,4 @@ ruby "3.2.1"
 
 gem "sinatra"
 gem "json"
+gem "openai"
